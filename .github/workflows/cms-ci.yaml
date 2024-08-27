@@ -20,10 +20,8 @@ jobs:
       # Install windows dependencies
       - name: install
         run: ci-scripts/install_windows.bat $WINDOWS_HPCKIT_URL $WINDOWS_FORTRAN_COMPONENTS
-
       - name: Setup VS2019
-        uses: warrenbuckley/Setup-MSBuild@v1
-
+        uses: richardo2016/Setup-MSBuild@releases/clangcl_x_2017/v1
       - name: MSBuild
         run: |
           - cd Intel_vs2019 
