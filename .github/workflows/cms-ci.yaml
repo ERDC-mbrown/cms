@@ -25,7 +25,7 @@ jobs:
         uses: fortran-lang/setup-fortran@v1
         id: setup-fortran
         with:
-          compiler: intel-classic
+          compiler: intel
       # - name: install
       #   run: ci-scripts/install_windows.bat $WINDOWS_HPCKIT_URL $WINDOWS_FORTRAN_COMPONENTS
 
