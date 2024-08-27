@@ -19,7 +19,6 @@ jobs:
         uses: actions/checkout@v4
       # Install windows dependencies
       - name: install
-        if: steps.cache-install.outputs.cache-hit != 'true'
         run: scripts/install_windows.bat $WINDOWS_HPCKIT_URL $WINDOWS_FORTRAN_COMPONENTS
       # Use CMake
       - name: Build Project
