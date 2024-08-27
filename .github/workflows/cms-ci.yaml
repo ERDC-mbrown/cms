@@ -20,17 +20,15 @@ jobs:
       # Install windows dependencies
       - name: install
         run: ci-scripts/install_windows.bat $WINDOWS_HPCKIT_URL $WINDOWS_FORTRAN_COMPONENTS
-      # Use CMake
-      - name: Build Project
-        uses: threeal/cmake-action@v2.0.0
-        with:
-          source-dir: source
-          build-dir: source
-      # Build the project
-      - name: make
+
+      - name: Setup VS2019
+        uses: warrenbuckley/Setup-MSBuild@v1
+
+      - name: MSBuild
         run: |
-          - cd source
-          - make
+          - cd Intel_vs2019 
+          - msbuild CM2SD_V5.3.sln
+
       # List directory contents
       - name: List directory
         run: ls -lah source
