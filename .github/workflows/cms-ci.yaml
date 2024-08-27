@@ -37,4 +37,7 @@ jobs:
 
       # List directory contents
       - name: List directory
-        run: ls -lah
+        run: |
+          cd Intel_vs2019
+          dir
+          type UpgradeLog.htm
