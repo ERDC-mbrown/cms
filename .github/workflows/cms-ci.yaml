@@ -38,6 +38,5 @@ jobs:
       # List directory contents
       - name: List directory
         run: |
-          cd Intel_vs2019
+          cd Intel_vs2022
           dir
-          type UpgradeLog.htm
