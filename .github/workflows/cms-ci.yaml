@@ -18,8 +18,13 @@ jobs:
       # Install windows dependencies
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v2
-      - name: install
-        run: ci-scripts/install_windows.bat $WINDOWS_HPCKIT_URL $WINDOWS_FORTRAN_COMPONENTS
+      - name: Setup Fortran
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: intel-classic
+      # - name: install
+      #   run: ci-scripts/install_windows.bat $WINDOWS_HPCKIT_URL $WINDOWS_FORTRAN_COMPONENTS
 
       # Build the code
       - name: MSBuild
