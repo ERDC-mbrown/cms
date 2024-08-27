@@ -27,10 +27,10 @@ jobs:
       # Build the code
       - name: MSBuild
         run: |
-          - ls -lah
-          - cd Intel_vs2019 
-          - ls -lah
-          - msbuild CMS2D_V5.3.sln
+          ls -lah
+          cd Intel_vs2019 
+          ls -lah
+          msbuild CMS2D_V5.3.sln
 
       # List directory contents
       - name: List directory
