@@ -23,9 +23,12 @@ jobs:
       # Use CMake
       - name: Build Project
         uses: threeal/cmake-action@v2.0.0
+        working-directory: source
       # Build the project
       - name: make
         run: make
+        working-directory: source
       # List directory contents
       - name: List directory
         run: ls -lah
+        working-directory: source
