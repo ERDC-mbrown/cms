@@ -30,6 +30,7 @@ jobs:
           ls -lah
           cd Intel_vs2019 
           ls -lah
+          msbuild -help
           msbuild CMS2D_V5.3.sln
 
       # List directory contents
