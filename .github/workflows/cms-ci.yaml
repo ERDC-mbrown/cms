@@ -17,11 +17,16 @@ jobs:
       # Checkout the code
       - name: Checkout code
         uses: actions/checkout@v4
+
       # Install windows dependencies
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v2
+        with:
+          vs-version: "[16.4,16.5)"
       - name: install
         run: ci-scripts/install_windows.bat $WINDOWS_HPCKIT_URL $WINDOWS_FORTRAN_COMPONENTS
-      - name: Setup VS2019
-        uses: richardo2016/Setup-MSBuild@releases/clangcl_x_2017/v1
+
+      # Build the code
       - name: MSBuild
         run: |
           - cd Intel_vs2019 
@@ -29,4 +34,4 @@ jobs:
 
       # List directory contents
       - name: List directory
-        run: ls -lah source
+        run: ls -lah
