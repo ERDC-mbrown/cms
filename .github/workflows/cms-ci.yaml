@@ -1,0 +1,32 @@
+name: CMS CI
+
+on: [push, pull_request]
+
+env:
+  WINDOWS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/745e923a-3f85-4e1e-b6dd-637c0e9ccba6/w_HPCKit_p_2024.2.1.80_offline.exe
+  WINDOWS_FORTRAN_COMPONENTS: intel.oneapi.win.ifort-compiler
+
+jobs:
+  build:
+    runs-on: [windows-2019]
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v4
+      # Install windows dependencies
+      - name: install
+        if: steps.cache-install.outputs.cache-hit != 'true'
+        run: scripts/install_windows.bat $WINDOWS_HPCKIT_URL $WINDOWS_FORTRAN_COMPONENTS
+      # Use CMake
+      - name: Build Project
+        uses: threeal/cmake-action@v2.0.0
+      # Build the project
+      - name: make
+        run: make
+      # List directory contents
+      - name: List directory
+        run: ls -lah
