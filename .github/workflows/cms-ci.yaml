@@ -28,7 +28,7 @@ jobs:
       - name: MSBuild
         run: |
           - cd Intel_vs2019 
-          - msbuild CM2SD_V5.3.sln
+          - msbuild CMS2D_V5.3.sln
 
       # List directory contents
       - name: List directory
