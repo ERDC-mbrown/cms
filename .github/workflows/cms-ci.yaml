@@ -23,8 +23,9 @@ jobs:
       # Use CMake
       - name: Build Project
         uses: threeal/cmake-action@v2.0.0
-        source-dir: source
-        build-dir: source
+        with:
+          source-dir: source
+          build-dir: source
       # Build the project
       - name: make
         run: |
