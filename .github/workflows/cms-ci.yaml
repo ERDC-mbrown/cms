@@ -28,7 +28,7 @@ jobs:
         uses: fortran-lang/setup-fortran@v1
         id: setup-fortran
         with:
-          compiler: intel
+          compiler: intel-classic
 
       # Build the code
       - name: MSBuild
