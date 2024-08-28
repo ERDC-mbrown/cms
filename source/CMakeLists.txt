@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
+project(cms)
 
 # CMake control file for building the CMS model
 

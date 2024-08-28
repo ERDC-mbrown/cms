@@ -15,13 +15,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # # Setup Visual Studio
-      # - name: Setup Visual Studio
-      #   uses: seanmiddleditch/gha-setup-vsdevenv@master
+      # Setup Visual Studio
+      - name: Setup Visual Studio
+        uses: seanmiddleditch/gha-setup-vsdevenv@master
 
-      # # Setup Dev Cmd
-      # - name: Setup Dev Cmd
-      #   uses: ilammy/msvc-dev-cmd@v1
+      # Setup Dev Cmd
+      - name: Setup Dev Cmd
+        uses: ilammy/msvc-dev-cmd@v1
 
       # Setup Intel HPC Kit
       - name: Setup Fortran
@@ -30,21 +30,25 @@ jobs:
         with:
           compiler: intel-classic
 
+      - name: Make a build directory
+        run: |
+          mkdir build
+
       # Use the cmake action
       - name: Build Project
         uses: threeal/cmake-action@v2.0.0
         with:
           source-dir: source
+          build-dir: build
 
-      # # Build the code
-      # - name: MSBuild
-      #   run: |
-      #     cd Intel_vs2019
-      #     devenv CMS2D_V5.3.sln /Build
+      # Build the code
+      - name: MSBuild
+        run: |
+          cd build
+          devenv cms.sln /Build
 
       # List directory contents
       - name: List directory
         run: |
-          cd Intel_vs2019
+          cd build
           dir
-          type UpgradeLog.htm
