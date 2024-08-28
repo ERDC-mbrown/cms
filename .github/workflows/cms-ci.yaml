@@ -8,7 +8,7 @@ env:
 
 jobs:
   build:
-    runs-on: [windows-2022]
+    runs-on: [windows-2019]
 
     steps:
       # Checkout the code
@@ -18,6 +18,10 @@ jobs:
       # Setup Visual Studio
       - name: Setup Visual Studio
         uses: seanmiddleditch/gha-setup-vsdevenv@master
+
+      # Setup Dev Cmd
+      - name: Setup Dev Cmd
+        uses: ilammy/msvc-dev-cmd@v1
 
       # Setup Intel HPC Kit
       - name: Setup Fortran
