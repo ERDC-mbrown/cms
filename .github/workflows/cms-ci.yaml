@@ -35,7 +35,6 @@ jobs:
         uses: threeal/cmake-action@v2.0.0
         with:
           source-dir: source
-          build-dir: source
 
       # # Build the code
       # - name: MSBuild
