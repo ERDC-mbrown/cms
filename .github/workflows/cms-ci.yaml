@@ -15,28 +15,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Install windows dependencies
-      # - name: Add msbuild to PATH
-      #   uses: microsoft/setup-msbuild@v2
-
+      # Setup Visual Studio
       - name: Setup Visual Studio
         uses: seanmiddleditch/gha-setup-vsdevenv@master
+
+      # Setup Intel HPC Kit
       - name: Setup Fortran
         uses: fortran-lang/setup-fortran@v1
         id: setup-fortran
         with:
           compiler: intel
-      # - name: install
-      #   run: ci-scripts/install_windows.bat $WINDOWS_HPCKIT_URL $WINDOWS_FORTRAN_COMPONENTS
 
       # Build the code
       - name: MSBuild
         run: |
-          cd Intel_vs2022 
+          cd Intel_vs2019 
           devenv CMS2D_V5.3.sln /Build
 
       # List directory contents
       - name: List directory
         run: |
-          cd Intel_vs2022
+          cd Intel_vs2019
           dir
+          type UpgradeLog.htm
