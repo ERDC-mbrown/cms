@@ -163,7 +163,7 @@
     open(dgunit,file=dgfile,access='append')
     iunit = (/6, dgunit/)
     do i=1,2
-        write(iunit(i),*)      
+      write(iunit(i),*)      
       if(roller)then
          write(iunit(i),888)     'Roller Model:','ON'
         if(rolflux)then

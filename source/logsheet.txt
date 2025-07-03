@@ -1,3 +1,7 @@
+== Version 5.4.6 (07/03/2025) ==
+* If hardbottom dataset seems inverted (elevations instead of depths), give warning and write out cells unless there are > 250.
+* Fix potential rounding issue on hard bottom check if above Z.  Tel file keeps only 3 significant digits for Z but HB has more.
+
 == Version 5.4.5 (06/23/2025) == 
 * Bug fix - need to test for enabled sediment after reading in cards in prestart
 * Enabled XMDF compilation on Linux. Updated workflow to compile CMS including XMDF libraries.

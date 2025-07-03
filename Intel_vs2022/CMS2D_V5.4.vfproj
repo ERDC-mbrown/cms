@@ -29,14 +29,20 @@
 	</Configurations>
 	<Files>
 		<Filter Name="Header Files" Filter="fi;fd">
-			<File RelativePath="..\source\main\CMS_cpp.h"/>
+			<File RelativePath="..\source\main\CMS_cpp.h">
+			</File>
 		</Filter>
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
-			<File RelativePath="..\source\CMakeLists.txt"/>
-			<File RelativePath="..\source\logsheet.txt"/>
+			<File RelativePath="..\source\CMakeLists.txt">
+			</File>
+			<File RelativePath="..\docs\user\installation.rst">
+			</File>
+			<File RelativePath="..\source\logsheet.txt">
+			</File>
 			<File RelativePath="..\source\readme.txt">
 			</File>
-			<File RelativePath="..\docs\user\whatsnew.rst"/>
+			<File RelativePath="..\docs\user\whatsnew.rst">
+			</File>
 		</Filter>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 			<Filter Name="Explicit Scheme">
@@ -137,7 +143,8 @@
 					<Tool Name="VFFortranCompilerTool" Diagnostics="diagnosticsDisableAll"/>
 				</FileConfiguration>
 			</File>
-			<File RelativePath="..\source\main\CMS2D_main.f90"/>
+			<File RelativePath="..\source\main\CMS2D_main.f90">
+			</File>
 			<File RelativePath="..\source\main\CMS_Flow.f90"/>
 			<File RelativePath="..\source\main\CMS_test.F90"/>
 			<File RelativePath="..\source\schemes\comp_lib.f90"/>
@@ -148,9 +155,11 @@
 			<File RelativePath="..\source\derivatives\derivatives.f90"/>
 			<File RelativePath="..\source\utilities\diag_def.f90"/>
 			<File RelativePath="..\source\utilities\diag_lib.f90"/>
-			<File RelativePath="..\source\utilities\diagnostics.f90"/>
+			<File RelativePath="..\source\utilities\diagnostics.f90">
+			</File>
 			<File RelativePath="..\source\dredge\dredge_def.f90"/>
-			<File RelativePath="..\source\dredge\dredge_op.F90"/>
+			<File RelativePath="..\source\dredge\dredge_op.F90">
+			</File>
 			<File RelativePath="..\source\dredge\dredge_setup.F90"/>
 			<File RelativePath="..\source\flow\flow.F90"/>
 			<File RelativePath="..\source\flow\flow_def.f90"/>
@@ -187,12 +196,15 @@
 			<File RelativePath="..\source\boundaries\nest_lib.f90"/>
 			<File RelativePath="..\source\boundaries\nest_par.f90"/>
 			<File RelativePath="..\source\boundaries\nesting.F90"/>
-			<File RelativePath="..\source\output\out_def.f90"/>
-			<File RelativePath="..\source\output\out_lib.f90"/>
+			<File RelativePath="..\source\output\out_def.f90">
+			</File>
+			<File RelativePath="..\source\output\out_lib.f90">
+			</File>
 			<File RelativePath="..\source\output\output.F90"/>
 			<File RelativePath="..\source\interpolation\plagr_lib.f90"/>
 			<File RelativePath="..\source\main\prestart.f90"/>
-			<File RelativePath="..\source\quasi3d\q3d_def.F90"/>
+			<File RelativePath="..\source\quasi3d\q3d_def.F90">
+			</File>
 			<File RelativePath="..\source\quasi3d\q3d_lib.F90"/>
 			<File RelativePath="..\source\quasi3d\quasi3d.F90"/>
 			<File RelativePath="..\source\roller\rol_def.f90"/>
@@ -210,7 +222,8 @@
 			<File RelativePath="..\source\sediment\sed_bnd.f90"/>
 			<File RelativePath="..\source\sediment\sed_capac.f90"/>
 			<File RelativePath="..\source\sediment\sed_def.f90"/>
-			<File RelativePath="..\source\sediment\sed_dry.f90"/>
+			<File RelativePath="..\source\sediment\sed_dry.f90">
+			</File>
 			<File RelativePath="..\source\sediment\sed_hidexp.f90"/>
 			<File RelativePath="..\source\sediment\sed_imp.f90"/>
 			<File RelativePath="..\source\sediment\sed_lib.f90"/>
@@ -233,7 +246,8 @@
 			<File RelativePath="..\source\utilities\time_lib.F90"/>
 			<File RelativePath="..\source\utilities\time_test.F90"/>
 			<File RelativePath="..\source\utilities\tool_def.f90"/>
-			<File RelativePath="..\source\utilities\tools.F90"/>
+			<File RelativePath="..\source\utilities\tools.F90">
+			</File>
 			<File RelativePath="..\source\utilities\unitconv_lib.F90"/>
 			<File RelativePath="..\source\vegetation\veg_def.f90"/>
 			<File RelativePath="..\source\vegetation\vegetation.F90"/>
@@ -245,7 +259,8 @@
 			<File RelativePath="..\source\waves\wave_lib.F90"/>
 			<File RelativePath="..\source\waves\wave_rad_stress_fl.f90"/>
 			<File RelativePath="..\source\sediment\wuetal.F90"/>
-			<File RelativePath="..\source\wrapper\Xmdff.f90"/>
+			<File RelativePath="..\source\wrapper\Xmdff.f90">
+			</File>
 		</Filter>
 	</Files>
 	<Globals/>

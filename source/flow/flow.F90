@@ -176,7 +176,7 @@
     use flow_def
     use diag_lib, only: diag_print_error, diag_print_warning
     use diag_def, only: msg2
-    use rol_def,  only: rolflux
+    use rol_def,  only: rolflux, roller
     use flow_lib, only: water_viscosity_kinematic
     use solv_def, only: asolv
     use time_lib, only: julday,calendar2julian,julianday2calendarmonthday
@@ -418,6 +418,7 @@
         
     case('ROLLER_MASS_FLUX','ROLLER_VOLUME_FLUX','ROLLER_FLUX_VELOCITY')
       call card_boolean(77,rolflux,ierr)    
+      if(rolflux) roller = .true.
       
     case('EXPLICIT_PRINT_INTERVAL')
       call card_scalar(77,'sec','sec',outinterval,ierr)

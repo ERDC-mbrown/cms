@@ -2209,7 +2209,7 @@ d1: do ii=1,30
       case(3); mhe = 0.5 !Watanabe
       case(4); mhe = 0.3 !Soulbsy-Van Rijn      
       case(5); mhe = 0.6 !Wu
-      case(6); mhe = 1.0 !Temporary matching (1) until guidance from BDJ
+      case(6); mhe = 1.0 !C2SHORE - Temporary matching (1) until guidance from BDJ
       end select
     endif
     
@@ -2697,12 +2697,16 @@ d1: do ii=1,30
     use prec_def
     
     implicit none
-    real    :: val
-    integer :: i,ih,ierr,idhardtemp(ncellsD),icount
-    integer :: hbwarn(ncellsD), nhbwarn
-    character(len=100) :: msg2,msg3
+    real    :: val, tmphardzb, tmpzb
+    integer :: i,ih,ierr,icount,roundval
+    integer :: nhbwarn, ninvwarn
+    integer, allocatable :: hbwarn(:), invwarn(:),idhardtemp(:)
+    character(len=100) :: msg,msg2,msg3
     character(len=10) :: aext
-
+    
+    open(200,file='hb_warning.txt',status='unknown')   !delete existing file if present.
+    close(200,status='delete')
+    
     call fileext(trim(hbfile),aext)      
     select case (aext)
     case('h5')
@@ -2729,31 +2733,53 @@ d1: do ii=1,30
     end select
     
 !Find number and id of hardbottom cells
-    nhbwarn=0
-    hbwarn=0
-    icount=0
+    allocate(hbwarn(ncellsD), invwarn(ncellsD), idhardtemp(ncellsD))
+    ninvwarn = 0
+    invwarn  = 0
+    nhbwarn  = 0
+    hbwarn   = 0
+    roundval = 6
     do I=1,ncells
-      if (rround(hardzb(I),3) == rround(zb(I),3)) then
-        icount = icount + 1
+      tmphardzb = rround(hardzb(i),roundval)
+      tmpzb = rround(zb(i),roundval)
+      if (tmphardzb  == tmpzb) then
+        if (abs(tmpzb) .ne. 0.0) then   !Ignore if the depths are exactly 0.00
+          ninvwarn = ninvwarn + 1
+          invwarn(ninvwarn) = i          
+        endif
       endif
     enddo
-    if (icount >= 10) then   !If there are a bunch of these, the dataset is probably inverted from what it should be. 
-      call diag_print_warning('There are more than 10 instances where the hardbottom value is exactly inverted from the depth value.','Flipping the sign of the hard bottom dataset.')
-      hardzb = -hardzb  
+    
+ 97 format('There are ',i0,' instances where the hardbottom value is exactly inverted from the depth value.')
+ 98 format('Check to see if the Hard Bottom values are depths (positive down)')
+ 99 format(15(i0,x)) 
+100 format('Specified hard bottom above bed elevation for ',i0,' cells.')
+101 format('Cell IDs written to file: "hb_warning.txt"')
+    
+    if (ninvwarn > 0) then   !If there are a bunch of these, the dataset is probably inverted from what it should be. 
+      write(msg,97) ninvwarn
+      write(msg2,98)
+      if (ninvwarn < 250) write(msg3,101)     !Don't write if there is a huge number of cells
+      
+      call diag_print_warning(msg,msg2,msg3)
+      open(200,file='hb_warning.txt',status='unknown') 
+      write(200,*) 'Cell IDs for potentially inverted hard bottom values'
+      if (ninvwarn < 250) write(200,99) (mapid(invwarn(i)),i=1,ninvwarn) 
+      
+      close(200)
     endif
+    
+    roundval = 3
     do i=1,ncells
-      if(abs(hardzb(i)+999.0)>1.0e-4)then
+      if(abs(hardzb(i)+999.0) > 1.0e-4)then  !If exactly -999.0 ignore, otherwise this is a hard bottom defined cell.
         nhard=nhard+1
         idhardtemp(nhard)=i
         hardzb(i) = -hardzb(i) !Note sign change from depths to elevations
+        
         !Check elevations
-        if(hardzb(i)>zb(i)+1.0e-3)then
-          !Removing this message for now.  Adding IDs of cells to an array all to be printed at one time.  MEB 12/11/2018
-          !write(msg2,*) '  Cell: ',mapid(i)
-          !write(msg3,*) '  Hard bottom depth: ',-hardzb(i),' m'
-          !write(msg4,*) '  Water Depth: ',-zb(i),' m'
-          !write(msg5,*) '  Setting bed elevation as hard bottom'
-          !call diag_print_warning('Specified hard bottom above bed elevation',msg2,msg3,msg4,msg5)
+        tmphardzb = rround(hardzb(i),roundval)
+        tmpzb = rround(zb(i),roundval)
+        if(tmphardzb > tmpzb+0.001)then   !Add 0.001 to account for potential rounding issue since zb had 3 significant digits at most and hardzb has more.
           nhbwarn = nhbwarn + 1
           hbwarn(nhbwarn) = i
         endif
@@ -2761,32 +2787,25 @@ d1: do ii=1,30
       endif
     enddo
     
- 99 format(15(i0,x))
-100 format('Specified hard bottom above bed elevation for ',i0,' cells.')
-101 format('Cell IDs written to file: "hb_warning.txt"')
-
-    if(nhbwarn .gt. 0) then 
+    if(nhbwarn > 0) then 
       write(msg2,100) nhbwarn
       write(msg3,101) 
       call diag_print_warning(msg2,msg3,'')
-!      write(*,99)      (hbwarn(i),i=1,nhbwarn)
-      
-      open(200,file='hb_warning.txt',status='unknown') 
+      open(200,file='hb_warning.txt',access='append') 
+      write(200,*) ''
+      write(200,*) 'Cell IDs where hard bottom value is above bed elevation'
       write(200,99) (mapid(hbwarn(i)),i=1,nhbwarn)  !changed to the ID of the cell as in SMS.  01/29/2019
       close(200)
     endif        
     
     !Copy hardbottom info to smaller arrays
-    if(nhard>0)then
+    if(nhard > 0)then
       hardbottom=.true.
       allocate(hardbed(nhard),idhard(nhard))
       do ih=1,nhard
         idhard(ih)=idhardtemp(ih) !No mapping necessary
         val = hardzb(idhard(ih))
         if(val >= -999.1 .and. val <= -998.9) then   !Ignore around the -999 flag for fully erodible.  This should have already been handled.
-          !write(msg2,*) '  Cell: ',idhard(ih)
-          !write(msg3,*) '  Hard bottom: ',hardzb(idhard(ih))  
-          !call diag_print_error('Could not calculate hard bottom ID',msg2,msg3)
           continue 
           cycle  !skip to the next value in the list
         endif

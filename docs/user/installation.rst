@@ -4,6 +4,7 @@ Installation and Usage
 ======================
 
 CMS is a Fortran package that can be compiled on Windows or Linux from source. For the source code, see the `GitHub repository <https://github.com/erdc/cms2d>`_.
+Additional guidance for compilation can be found on this `CIRP wiki page <https://cirpwiki.info/wiki/CMS_Compilation>`_.
 
 Windows
 -------
