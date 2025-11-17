@@ -28,7 +28,7 @@ def main():
     parser.add_argument('-b', '--build', help='Enter 0 to skip build', required=False, default=0)
     parser.add_argument('-t', '--test', help='Enter 0 to skip tests.', required=False, default=1)
     parser.add_argument('-tf', '--test_folder', help='Enter directory to search for .cmcards files.', required=False,
-                        default='testing/tests/L05_Implicit_Test01')
+                        default='testing/tests_flow/L05_Implicit_Test01')
     parser.add_argument('-n_proc', '--number_concurrent_processes', help='Enter number of concurrent processes',
                         required=False, default=2)
     args = parser.parse_args()
