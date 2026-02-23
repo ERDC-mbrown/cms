@@ -1,6 +1,15 @@
 What's New
 ==========
 
+v5.4.7 (23 February 2026)
+-------------------------
+
+Changes
+^^^^^^^
+* Change fractional dataset names from "Datasets/Fraction_01 (1)" to "Datasets/Fraction_S1_L1" for updates in SMS for sediment mapping for readability.
+** Retain previous format for backward compatibility
+* Initialize some output logical variables related to sediment mapping.
+
 v5.4.6 (03 July 2025)
 -------------------------
 

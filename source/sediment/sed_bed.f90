@@ -843,6 +843,42 @@
     end subroutine dper_read_error_msg
     
 !*******************************************************************************
+    subroutine getFormatType(filename, newFormat, ierr)
+!*******************************************************************************
+! This routine looks at the 10th character of the first dataset returned to see
+! if it is an 'S' which matches the new format: 'Fraction_S1_L1' instead of the
+! old: 'Fraction_01 (1)' and returns True or False
+!*******************************************************************************
+    use XMDF
+    use const_def, only: READONLY
+    
+    character(len=*), intent(in) :: filename
+    logical, intent(out)         :: newFormat
+    integer, intent(out)         :: ierr
+    integer(XID) :: fid, gid, nfid, ndid
+    integer      :: nSDsets, sMaxPathLength
+    character(len=200),allocatable :: paths(:)
+    character(len=200) :: sPath(1)
+    character(len=1) :: aChar
+    
+    newFormat = .false.
+    call XF_OPEN_FILE(trim(filename), READONLY, fid, ierr)
+    call XF_OPEN_GROUP(fid, 'Datasets', gid, ierr)
+    call XF_GET_SCALAR_DATASETS_INFO (gid, nSDsets, sMaxPathLength, ierr)
+    allocate(paths(nSDsets))
+    paths = ' '; sPath = ' '; aChar = ' '
+    call XF_GET_SCALAR_DATASET_PATHS (gid, nSDsets, sMaxPathLength, sPath, ierr)
+    if (ierr .le. 0) return
+    
+    aChar = sPath(1)(10:10)
+    if(aChar == 'S') newFormat = .true.
+ 
+    deallocate(paths)
+    
+    return
+    end subroutine getFormatType
+    
+!*******************************************************************************
     subroutine read_pbk(j,pbkfilelay,pbkpathlay)
 ! Reads the bed material composision file
 ! written by Alex Sanchez, USACE-ERDC-CHL 
@@ -854,47 +890,64 @@
     use in_xmdf_lib, only: readscalh5
 #endif   
     use in_lib, only: readscalTxt
-    
     implicit none
+    
     integer :: i,j,ks,ierr
-    character(len=200) :: apath
-    character(len=5) :: apbk,alay
-    character(len=10):: aext
-    character(len=*) ::pbkfilelay,pbkpathlay
-
-62  format('_',I2.2)
-71  format(1x,'(',I1,')')
-72  format(1x,'(',I2,')')
-    !do j=1,nlay-1
+    character(len=200) :: apath, altpath
+    character(len=5)   :: apbk,alay,altpbk,altlay
+    character(len=10)  :: aext
+    character(len=*)   :: pbkfilelay,pbkpathlay
+    logical            :: isNewFormat
+    
+    !Determine if using the new dataset naming or old.
+    call getFormatType(pbkfilelay, isNewFormat, ierr)
+    
+    if(isNewFormat) then                   !New Fractional dataset naming
       if(j<=9)then
-        write(alay,71) j
+        write(alay,"('_L',I1)") j
       else
-        write(alay,72) j
-      endif  
-      do ks=1,nsed
-        write(apbk,62) ks
-        apath = trim(pbkpathlay) // trim(apbk) // alay
+        write(alay,"('_L',I2)") j
+      endif
+    else
+      if(j<=9)then
+        write(alay,"(1x,'(',I1,')')") j
+      else
+        write(alay,"(1x,'(',I2,')')") j
+      endif
+    endif   
+    
+    do ks=1,nsed
+      if(isNewFormat) then                 !New Fractional dataset naming         
+        if (nsed <= 9) then 
+          write(apbk,"('_S',I1)") ks                                   
+        else
+          write(apbk,"('_S',I2)") ks
+        endif
+      else
+        write(apbk,"('_',I2.2)") ks
+      endif
+      apath = trim(pbkpathlay) // trim(apbk) // alay
 
-        call fileext(trim(pbkfilelay),aext)      
-        select case (aext)
-        case('h5')
+      call fileext(trim(pbkfilelay),aext)      
+      select case (aext)
+      case('h5')
 #ifdef XMDF_IO         
-        call readscalh5(pbkfilelay,apath,pbk(:,ks,j),ierr)
-        if(ierr/=0)then
-          apath = trim(pbkpathlay) // trim(apbk)
+        call readscalh5(pbkfilelay,apath,pbk(:,ks,j),ierr)                   
+        
+        if(ierr < 0) then
+          apath = trim(pbkpathlay) // trim(apbk)                             
           call readscalh5(pbkfilelay,apath,pbk(:,ks,j),ierr)
         endif
 #endif
-        case('txt')
-          call readscalTxt(pbkfilelay,pbk(:,ks,j),ierr)    
-          if(ierr/=0)then
-            apath = trim(pbkpathlay) // trim(apbk)
-            call readscalTxt(pbkfilelay,pbk(:,ks,j),ierr)
-          endif
-        end select
+      case('txt')
+        call readscalTxt(pbkfilelay,pbk(:,ks,j),ierr)    
+        if(ierr/=0)then
+          apath = trim(pbkpathlay) // trim(apbk)
+          call readscalTxt(pbkfilelay,pbk(:,ks,j),ierr)
+        endif
+      end select
         
-      enddo
-    !enddo 
+    enddo
     
     !Make sure fractions sum 1.0
     do i=1,ncells

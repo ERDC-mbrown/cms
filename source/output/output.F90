@@ -58,7 +58,10 @@
     !Sediment
     write_conc = .true.          !Concentration
     write_capac = .true.         !Concentration capacity
+    write_concfrac = .false.     !Concentration fractions
     write_fracsusp = .false.     !Fraction of suspended transport
+    write_sizefrac = .false.     !Fraction of bedload sediment
+    write_thickness = .false.    !Bed Layer Thickness values.
     write_morph = .true.         !Morphology Change (bed change) 
     write_alphatot = .false.     !Adaptation coefficient for total-load
     write_lengthtot = .false.    !Adaptation length for total-load
@@ -649,10 +652,10 @@
       case('CONC_OUTPUT','CONCENTRATION_OUTPUT','OUTPUT_CONC','OUTPUT_CONCENTRATION') !Ct
         call card_boolean(77,write_conc,ierr)
         
-      case('CONC_FRAC_OUTPUT','OUTPUT_CONC_FRAC','OUTPUT_CONCENCTRATION_FRACTION') !Ctk
+      case('CONC_FRAC_OUTPUT','OUTPUT_CONC_FRAC','OUTPUT_CONCENTRATION_FRACTION') !Ctk
         call card_boolean(77,write_concfrac,ierr)  
         
-      case('CONC_SUSP_OUTPUT','OUTPUT_CONC_SUSP','OUTPUT_CONCENCTRATION_SUSPENDED') !Cs
+      case('CONC_SUSP_OUTPUT','OUTPUT_CONC_SUSP','OUTPUT_CONCENTRATION_SUSPENDED') !Cs
         call card_boolean(77,write_concsusp,ierr)
       
       !case('CONC_SUSP_FRAC_OUTPUT','OUTPUT_CONC_SUSP_FRAC') !Csk

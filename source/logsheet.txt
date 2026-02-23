@@ -1,3 +1,8 @@
+== Version 5.4.7 (02/23/2026) ==
+* Change fractional dataset names from "Datasets/Fraction_01 (1)" to "Datasets/Fraction_S1_L1" for updates in SMS for sediment mapping for readability.
+** Retain previous format for backward compatibility
+* Initialize some output logical variables related to sediment mapping.
+
 == Version 5.4.6 (07/03/2025) ==
 * If hardbottom dataset seems inverted (elevations instead of depths), give warning and write out cells unless there are > 250.
 * Fix potential rounding issue on hard bottom check if above Z.  Tel file keeps only 3 significant digits for Z but HB has more.

@@ -2583,6 +2583,7 @@ d1: do ii=1,30
           end select
           
           write(iunit(i),111)   '    Composition Method:',trim(apbkinp(bedlay(j)%ipbkinp))
+          write(iunit(i),111)   '    Composition File:',trim(bedlay(j)%pbkfile)
           
           select case(bedlay(j)%ipbkinp)
           case(1) !D50_SIGMA

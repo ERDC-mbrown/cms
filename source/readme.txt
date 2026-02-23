@@ -74,7 +74,7 @@
      - You must have the HDF5 (and Zlib) libraries installed on your system.
         
    Instructions (updated 06/18/25):
-     1. Clone repository or unzip CMS Source into a folder.
+     1. Clone repository or unzip CMS source code into a folder.
      2. Go to the root directory of the repo. 
      3. Type `cmake .` at the prompt    !(do not enter the ` characters)
      4. Type `make clean`
