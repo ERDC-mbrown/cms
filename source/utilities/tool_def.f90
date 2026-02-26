@@ -166,6 +166,14 @@
     endif
   end function adjustc  
 
+!************************************************************
+  pure logical function is_digit(c)
+! Input:   single character
+! Returns: .true. or .false.
+!************************************************************
+    character(len=1), intent(in) :: c
+    is_digit = (c >= '0' .and. c <= '9')
+  end function is_digit
 
 !************************************************************
     end module tool_def      

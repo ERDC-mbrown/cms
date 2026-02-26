@@ -827,38 +827,101 @@ contains
     end subroutine writescalh5
     
 !**************************************************************************
-    subroutine write_h5_general_cf_info (a_Id, aname)
-! when a new XMDF file is create, writes the appropriate CF compliance attributes
+  function strip_cf_suffix(aname) result(stripped)
+! Takes in a string as input and looks to see if it fits a pattern containing:
+! -Older per layer or per class names - '_#', '_##', ' (##)'
+! -Newer per layer or per class names - '_S#', '_S##', '_L#', '_L##'
+! -or newer named combinations of each.
+! Returns the string with the suffixes stripped off
 !
 ! Mitchell Brown, USACE-ERDC-CHL  02/21/2025
 !**************************************************************************
-    use xmdf,     only: XF_SET_ATTRIBUTE_STRING, XF_CLOSE_GROUP
+  use tool_def, only: is_digit
+  implicit none
+  
+  character(len=*), intent(in) :: aname
+  character(len=len(aname))    :: stripped
+  integer :: n, p
+
+  stripped = aname
+  n = len_trim(aname)
+
+  ! Pattern: ' (#)' or ' (##)'
+  if (n >= 4 .and. aname(n:n) == ')') then
+    p = n - 1
+    if (is_digit(aname(p:p))) p = p - 1                        ! optional second digit
+    if (is_digit(aname(p:p))) then                             ! required first digit
+      if (aname(p-1:p-1) == '(' .and. aname(p-2:p-2) == ' ') then
+        stripped = aname(1:p-3)
+        return
+      end if
+    end if
+  end if
+
+  ! Pattern: '_S#' or '_S##...' (scan backwards for first occurrence)
+  do p = n-2, 1, -1
+    if (aname(p:p) == '_' .and. aname(p+1:p+1) == 'S' .and. &
+        is_digit(aname(p+2:p+2))) then
+      stripped = aname(1:p-1)
+      return
+    end if
+  end do
+
+  ! Patterns: '_L##', '_L#', '_##', '_#'
+  ! Walk backwards past up to two digits, then check for the prefix character
+  p = n
+  if (is_digit(aname(p:p))) p = p - 1
+  if (p < n .and. is_digit(aname(p:p))) p = p - 1             ! optional second digit
+  if (p < n) then                                              ! at least one digit found
+    if (aname(p:p) == 'L' .and. p > 1 .and. aname(p-1:p-1) == '_') then
+      stripped = aname(1:p-2)
+      return
+    end if
+    if (aname(p:p) == '_') then
+      stripped = aname(1:p-1)
+      return
+    end if
+  end if
+  
+end function strip_cf_suffix    
+    
+!**************************************************************************
+    subroutine write_h5_general_cf_info (a_Id, aname)
+! when a new XMDF file is created, writes the appropriate CF compliance attributes
+!
+! Mitchell Brown, USACE-ERDC-CHL  02/21/2025
+!**************************************************************************
+    use xmdf,     only: XF_CLOSE_GROUP, XF_WRITE_PROPERTY_STRING, XF_SET_ATTRIBUTE_STRING
     use XMDFDEFS, only: XID
     use out_def,  only: cf_vars,ncf_vars
-    use diag_lib, only: diag_print_warning
+    use diag_lib, only: diag_print_message
     implicit none
     
     integer(XID), intent(in) :: a_Id
     character(len=*), intent(in) :: aname
     
-    integer(XID) :: pid
-    integer             :: error, i, list_item
-    character(len=50)   :: output_name
+    integer(XID)        :: pid
+    integer             :: error, i, list_item, suffix_pos, aname_len
+    character(len=100)  :: output_name, aString(1)
     character(len=100)  :: long_name
     character(len=100)  :: standard_name
     character(len=20)   :: units
     character(len=10)   :: positive
+    character(len=LEN(aname)) :: aname_stripped
+    
+    !If related to a bed_layer or sediment size class, simply return the base name.
+    aname_stripped = strip_cf_suffix(TRIM(aname))
     
     list_item = -1
     do i=1,ncf_vars
-      if (trim(cf_vars(i)%output_name) == aname) then
+      if (trim(cf_vars(i)%output_name) == TRIM(aname_stripped)) then
         list_item = i
         exit
       endif
     enddo
     
     if (list_item < 0) then
-      call diag_print_warning('Could not find CF match to: '//trim(aname))
+      call diag_print_message('WARNING: Could not find CF match to: '//trim(aname))
       return
     endif
     
@@ -868,20 +931,22 @@ contains
     units = cf_vars(list_item)%units
     positive = cf_vars(list_item)%positive
     
-    call OPEN_CREATE_DATASET(a_Id,'PROPERTIES',pid,1,'',error)                   !Open dataset (this dataset should already have been created).
-    call XF_SET_ATTRIBUTE_STRING (pid, 'short_name', output_name, error)
-    call XF_SET_ATTRIBUTE_STRING (pid, 'long_name', long_name, error)
-    call XF_SET_ATTRIBUTE_STRING (pid, 'standard_name', standard_name, error)
-    call XF_SET_ATTRIBUTE_STRING (pid, 'units', units, error)
-    call XF_SET_ATTRIBUTE_STRING (pid, 'positive', positive, error)
-    call XF_CLOSE_GROUP(pid,error)  !Close dataset    
+    !call OPEN_CREATE_DATASET(a_Id,'PROPERTIES',pid,1,'',error)  !Open dataset (this dataset should already have been created).
+    
+    call XF_SET_ATTRIBUTE_STRING (a_Id, 'short_name', output_name, error)  !Change to writing attributes to root group instead of PROPERTIES group. 02/26/2026
+    call XF_SET_ATTRIBUTE_STRING (a_Id, 'long_name', long_name, error)
+    call XF_SET_ATTRIBUTE_STRING (a_Id, 'standard_name', standard_name, error)
+    call XF_SET_ATTRIBUTE_STRING (a_Id, 'units', units, error)
+    call XF_SET_ATTRIBUTE_STRING (a_Id, 'positive', positive, error)
+    
+    !call XF_CLOSE_GROUP(pid,error)  !Close dataset   
     
     return
     end subroutine write_h5_general_cf_info
     
     
 !**************************************************************************
-    subroutine writevech5(afile,apath,aname,varx,vary,aunits,timehr,iwritedry,writecf_var)
+    subroutine writevech5(afile,apath,aname,varx,vary,aunits,timehr,iwritedry)
 ! writes a vector dataset to the xmdf file with id ncellsfull PID
 !
 ! written by Alex Sanchez, USACE-ERDC-CHL  
@@ -897,7 +962,6 @@ contains
     character(len=*),intent(in)  :: afile,apath,aname,aunits
     real(ikind),     intent(in)  :: varx(ncellsD),vary(ncellsD),timehr
     integer,         intent(in)  :: iwritedry
-    logical,intent(in), optional :: writecf_var   !This logical indicates whether to pull from the 'cf_vals' list and writes extra attributes to the dataset.
 
     !Internal Variables
     integer(XID) :: pid,did
@@ -918,7 +982,6 @@ contains
       call XF_CREATE_FILE(trim(afile),readwrite,pid,ierr)
     endif 
     call OPEN_CREATE_DATASET(PID,trim(afullpath),did,2,aunits,ierr) !Open/create dataset
-    if(present(writecf_var) .and. ierr == -666) call write_h5_general_cf_info(did, trim(aname)) !Write general CF attributes on new file creation  MEB 02/21/2025
 
     timed = dble(timehr)
     call XF_WRITE_VECTOR_TIMESTEP(did,timed,ncellsfull,2,vecout,ierr) !Write data to XMDF file    
@@ -1198,15 +1261,12 @@ contains
     ncf_vars = 0
     call add_item_to_cf_list('Water_Elevation','sea surface elevation','surface_elevation','m','up')
     call add_item_to_cf_list('Total_Water_Depth','bathymetry plus surface elevation','total_water_depth','m','down')
-    call add_item_to_cf_list('Current_Velocity','vertical averaged velocity vector','u/v_velocity','m/s','x/y_direction')
     call add_item_to_cf_list('Current_Magnitude','magnitude of vertical averaged velocity','velocity_magnitude','m/s','up')
     call add_item_to_cf_list('Depth','bathymetry plus change due to sediment transport','depth_through_time','m','down')
     call add_item_to_cf_list('Morphology_Change','change due to sediment transport','depth_change_through_time','m','up')
     call add_item_to_cf_list('Eddy_Viscosity','diffusivity due to eddy advection','ocean_tracer_diffusivity_due_to_parameterized_mesoscale_eddy_advection','m^2/s','up')
     call add_item_to_cf_list('Concentration','concentration of suspended sediment','mass_concentration_of_suspended_sediment_in_sea_water','kg/m^3','up')
     call add_item_to_cf_list('Capacity','maximum capacity of sea water to hold sediment','maximum_capacity_of_sea_water_to_hold_suspended_sediment','kg/m^3','up')
-    call add_item_to_cf_list('Total_Sediment_Transport','total sediment transport across unit distance in ocean', &
-                             'total_sediment_transport_across_unit_distance_in_ocean','kg/m/s','x/y_direction')
     call add_item_to_cf_list('Fraction_Suspended','fraction of suspended sediment of specific grain size', &
                              'fraction_suspended_sediment_for_specific_grain_size_in_sea_water','nondimensional','up')
     call add_item_to_cf_list('Salinity','concentration of salinity','mass_concentration_of_salinity_in_sea_water','ppt','up')
@@ -1214,17 +1274,28 @@ contains
     call add_item_to_cf_list('Wave_Height','significant wave height','sea_surface_wave_significant_height','m','up')
     call add_item_to_cf_list('Wave_Period','parabolic fit to the period of the peak of the energy', &
                              'sea_surface_wave_period_at_variance_spectral_density_maximum','s','up')
-    call add_item_to_cf_list('Wave_Height_Vec','significant wave height vectors','sea_surface_wave_significant_height_vectors','m','up')
     call add_item_to_cf_list('Wave_Dissipation','reduction in stress due to dissipation of waves', &
                              'sea_surface_downward_stress_due_to_dissipation_of_sea_surface_waves','m^2/s','down')
-    call add_item_to_cf_list('Wave_Rad_Str','wave xy radiation stress vectors','sea_surface_wave_xy_radiation_stress','m^2/s^2','up')
     call add_item_to_cf_list('Wave_Rad_Str_Mag','wave xy radiation stress magnitude','sea_surface_wave_xy_radiation_stress','m^2/s^2','up')
     call add_item_to_cf_list('Pressure','sea water pressure','sea_water_pressure_due_to_sea_water','m^2/s^2','up')
-    call add_item_to_cf_list('Wind_Velocity','wind_velocity_vector','wind_u/v_velocity','m/s','u/v_direction')
     call add_item_to_cf_list('Wind_Magnitude','magnitude of wind u/v velocity','velocity_magnitude','m/s','up')
-    call add_item_to_cf_list('Wind_Stress','wind xy stress vectors','wind_xy_stress','N/m^2','x/y_direction')
     call add_item_to_cf_list('Wind_Stress_Magnitude','magnitude of wind xy stress','wind_xy_stress_magnitude','N/m^2','up')
     call add_item_to_cf_list('Atm_Pressure','atmospheric pressure at sea level','air_pressure_at_mean_sea_level','Pa','up')
+! Added 02/26/2026 - non-standard
+    call add_item_to_cf_list('Layer_Thickness','ocean bed layer thickness','bed_layer_thickness','m','down')
+    call add_item_to_cf_list('Layer_Fraction','fraction of sediment of specific grain size in ocean bed layer', &
+                             'fraction_sediment_of_specific_grain_size_in_ocean_bed','nondimensional','up')
+    call add_item_to_cf_list('Percentile_D05','5th percentile grain diameter in ocean bed','diameter_of_sediment_grain','mm','up')
+    call add_item_to_cf_list('Percentile_D10','10th percentile grain diameter in ocean bed','diameter_of_sediment_grain','mm','up')
+    call add_item_to_cf_list('Percentile_D16','16th percentile grain diameter in ocean bed','diameter_of_sediment_grain','mm','up')
+    call add_item_to_cf_list('Percentile_D20','20th percentile grain diameter in ocean bed','diameter_of_sediment_grain','mm','up')
+    call add_item_to_cf_list('Percentile_D30','30th percentile grain diameter in ocean bed','diameter_of_sediment_grain','mm','up')
+    call add_item_to_cf_list('Percentile_D35','35th percentile grain diameter in ocean bed','diameter_of_sediment_grain','mm','up')
+    call add_item_to_cf_list('Percentile_D50','median sediment grain diameter in ocean bed','diameter_of_sediment_grain','mm','up')
+    call add_item_to_cf_list('Percentile_D65','65th percentile grain diameter in ocean bed','diameter_of_sediment_grain','mm','up')
+    call add_item_to_cf_list('Percentile_D84','84th percentile grain diameter in ocean bed','diameter_of_sediment_grain','mm','up')
+    call add_item_to_cf_list('Percentile_D90','90th percentile grain diameter in ocean bed','diameter_of_sediment_grain','mm','up')
+    call add_item_to_cf_list('Percentile_D95','95th percentile grain diameter in ocean bed','diameter_of_sediment_grain','mm','up')
     
     return
     end subroutine init_cf_var_list

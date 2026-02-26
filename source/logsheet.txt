@@ -1,5 +1,12 @@
+== Version 5.4.7.1 (02/26/2026) ==
+* Added functionaility to write new naming convention for pertinent output datasets (See 5.4.7).
+* Added CF Compliance attributes to output datasets written bed layer thickness, bed layer fractions, and sediment percentiles
+* Now writing CF compliance attributes to each solution's root group instead of "PROPRERTIES" group.
+* Stop writing CF attributes for vector datasets.  Will implement on separated scalars at a later date.
+* Added new function to test a character to see if it is a numeric digit.
+
 == Version 5.4.7 (02/23/2026) ==
-* Change fractional dataset names from "Datasets/Fraction_01 (1)" to "Datasets/Fraction_S1_L1" for updates in SMS for sediment mapping for readability.
+* Change fractional dataset names from "Datasets/Fraction_01 (1)" to "Datasets/Fraction_S1_L1" for updates in SMS for sediment mapping for readability in the input files.
 ** Retain previous format for backward compatibility
 * Initialize some output logical variables related to sediment mapping.
 

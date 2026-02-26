@@ -1703,7 +1703,7 @@ implicit none
       endif      
       if(waveflux)then !****************************
         vecx=u-us; vecy=v-vs !Current (Eulerian) velocities    
-        call writevech5(outlist(2)%afile,apath,'Current_Velocity',vecx,vecy,'m/s',timehrs,0,enable_cf)
+        call writevech5(outlist(2)%afile,apath,'Current_Velocity',vecx,vecy,'m/s',timehrs,0)
         if(write_veltotal)then
           call writevech5(outlist(2)%afile,apath,'Total_Flux_Velocity',u,v,'m/s',timehrs,0)
           if(write_veltotalmag)then
@@ -1714,7 +1714,7 @@ implicit none
           endif  
         endif          
       else
-        call writevech5(outlist(2)%afile,apath,'Current_Velocity',u,v,'m/s',timehrs,0,enable_cf)
+        call writevech5(outlist(2)%afile,apath,'Current_Velocity',u,v,'m/s',timehrs,0)
       endif    
       if(write_velpred)then
         call writevech5(outlist(2)%afile,apath,'Predicted_Current_Velocity',upred,vpred,'m/s',timehrs,0)
@@ -1797,7 +1797,11 @@ implicit none
       endif  
       if(write_concfrac)then  
         do ks=1,nsed
-          write(apbk,62) ks
+          if (nsed <= 9) then 
+            write(apbk,"('_S',I1)") ks  ! Change to new format with _S representing size classes.                                 
+          else
+            write(apbk,"('_S',I2)") ks
+          endif
           aname='Concentration' // apbk
           call writescalh5(outlist(4)%afile,apath,aname,Ctk(:,ks),'kg/m^3',timehrs,0,enable_cf)
           if(isedmodel/=3)then   
@@ -1806,7 +1810,7 @@ implicit none
           endif
         enddo !ks
       endif
-      call writevech5(outlist(4)%afile,apath,'Total_Sediment_Transport',qtx,qty,'kg/m/s',timehrs,0,enable_cf)
+      call writevech5(outlist(4)%afile,apath,'Total_Sediment_Transport',qtx,qty,'kg/m/s',timehrs,0)
       if(write_fracsusp)then
         call writescalh5(outlist(4)%afile,apath,'Fraction_Suspended',rs,'none',timehrs,0,enable_cf)
       endif
@@ -1874,12 +1878,12 @@ implicit none
       call writescalh5(outlist(7)%afile,apath,'Wave_Period',Wper,'s',timehrs,0,enable_cf)
       vecx=Whgt*Wunitx
       vecy=Whgt*Wunity
-      call writevech5(outlist(7)%afile,apath,'Wave_Height_Vec',vecx,vecy,'m',timehrs,0,enable_cf)
+      call writevech5(outlist(7)%afile,apath,'Wave_Height_Vec',vecx,vecy,'m',timehrs,0)
       if(write_wavbrkdiss)then
         call writescalh5(outlist(7)%afile,apath,'Wave_Dissipation',wavediss,'none',timehrs,0,enable_cf)
       endif
       if(write_wavstress)then
-        call writevech5(outlist(7)%afile,apath,'Wave_Rad_Str',wavestrx,wavestry,'m^2/s^2',timehrs,0,enable_cf)
+        call writevech5(outlist(7)%afile,apath,'Wave_Rad_Str',wavestrx,wavestry,'m^2/s^2',timehrs,0)
         do i=1,ncells
           val(i) = sqrt(wavestrx(i)*wavestrx(i) + wavestry(i)*wavestry(i))
         enddo
@@ -1926,7 +1930,7 @@ implicit none
       if(windvar .or. windsta)then
         call print_output_header(header)
         if(windformat/=7)then
-          call writevech5(outlist(8)%afile,apath,'Wind_Velocity',uwind,vwind,'m/s',timehrs,1,enable_cf)
+          call writevech5(outlist(8)%afile,apath,'Wind_Velocity',uwind,vwind,'m/s',timehrs,1)
           do i=1,ncells
             val(i) = sqrt(uwind(i)*uwind(i) + vwind(i)*vwind(i))
           enddo
@@ -1936,7 +1940,7 @@ implicit none
           endif
         endif
         if(write_wndstress)then
-          call writevech5(outlist(8)%afile,apath,'Wind_Stress',tauwindx,tauwindy,'N/m^2',timehrs,1,enable_cf)
+          call writevech5(outlist(8)%afile,apath,'Wind_Stress',tauwindx,tauwindy,'N/m^2',timehrs,1)
         endif
         if(write_wndstressmag)then
           do i=1,ncells
@@ -1947,7 +1951,7 @@ implicit none
       elseif(windconst)then
         call print_output_header(header)
         vecx = wndx; vecy = wndy               
-        call writevech5(outlist(8)%afile,apath,'Wind_Velocity',vecx,vecy,'m/s',timehrs,1,enable_cf)
+        call writevech5(outlist(8)%afile,apath,'Wind_Velocity',vecx,vecy,'m/s',timehrs,1)
         val = sqrt(wndx*wndx + wndy*wndy)  !scalar to vector 
         call writescalh5(outlist(8)%afile,apath,'Wind_Magnitude',val,'m/s',timehrs,1,enable_cf)
       endif
@@ -1964,37 +1968,46 @@ implicit none
     if(check_time_list(10))then      
       !Sediment Percentiles   
       val=1000.0*d50 !Convert from m to mm
-      call writescalh5(outlist(10)%afile,apath,'D50',val,'mm',timehrs,1)   
+      call writescalh5(outlist(10)%afile,apath,'Percentile_D50',val,'mm',timehrs,1,enable_cf)   
       if(outperdiam(ipd(90)))then
         val=1000.0*d90 !Convert from m to mm
-        call writescalh5(outlist(10)%afile,apath,'D90',val,'mm',timehrs,1)     
+        call writescalh5(outlist(10)%afile,apath,'Percentile_D90',val,'mm',timehrs,1,enable_cf)     
       endif    
       do ii=1,nperdiam
         if(iper(ii)==50 .or. iper(ii)==90) cycle !Already output above  
         if(outperdiam(ii))then
           call sedpercentile(iper(ii),val)
           val=1000.0*val !Convert from m to mm
-4324 format('D',I02)
           write(aperdiam,4324) iper(ii)
-          call writescalh5(outlist(10)%afile,apath,aperdiam,val,'mm',timehrs,1)  
+          call writescalh5(outlist(10)%afile,apath,'Percentile_'//aperdiam,val,'mm',timehrs,1,enable_cf)  
         endif
       enddo
+4324 format('D',I02)
+      
+! To better reference these types with CF compliance, we are changing the naming  02/26/2026
+! Former names are commented to the side      
+! Each output routine has added the argument 'enable_cf' to do CF checking and writing.
       if(write_thickness .or. write_sizefrac)then
         do j=1,nlay
           if(j<=9)then
-            write(alay,71) j
+            write(alay,"('_L',I1)") j       ! Change to new format with _L representing bed layers.
           else
-            write(alay,72) j
+            write(alay,"('_L',I2)") j
           endif
+          
           if(write_thickness)then
-            aname = 'Thickness' // trim(alay)
-            call writescalh5(outlist(10)%afile,apath,aname,db(:,j),'m',timehrs,1)
+            aname = 'Layer_Thickness' // trim(alay)   !'Thickness' // alay
+            call writescalh5(outlist(10)%afile,apath,aname,db(:,j),'m',timehrs,1,enable_cf)
           endif
           if(write_sizefrac)then
             do ks=1,nsed
-              write(apbk,62) ks  
-              aname = 'Fraction' // trim(apbk) // trim(alay)
-              call writescalh5(outlist(10)%afile,apath,aname,pbk(:,ks,j),'none',timehrs,1)              
+              if (nsed <= 9) then 
+                write(apbk,"('_S',I1)") ks  ! Change to new format with _S representing size classes.
+              else
+                write(apbk,"('_S',I2)") ks
+              endif
+              aname = 'Layer_Fraction' // trim(apbk) // trim(alay) !'Fraction' // apbk // alay
+              call writescalh5(outlist(10)%afile,apath,aname,pbk(:,ks,j),'none',timehrs,1,enable_cf)
             enddo !ks
           endif
         enddo !j

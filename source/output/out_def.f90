@@ -93,7 +93,7 @@ module out_def
     
     !Adding cf compliance information to be written to HDF5 (XMDF or NetCDF) datasets.  MEB  10/02/2023
     type cf_var_type
-      character(len=50)  :: output_name
+      character(len=100) :: output_name
       character(len=100) :: long_name
       character(len=100) :: standard_name
       character(len=20)  :: units
