@@ -6,7 +6,7 @@ v5.4.7.1 (26 February 2026)
 
 Changes
 ^^^^^^^
-* Added functionaility to write new naming convention for pertinent output datasets (See 5.4.7).
+* Added functionality to write new naming convention for pertinent output datasets (See 5.4.7).
 * Added CF Compliance attributes to output datasets written bed layer thickness, bed layer fractions, and sediment percentiles
 * Now writing CF compliance attributes to each solution's root group instead of "PROPRERTIES" group.
 * Stop writing CF attributes for vector datasets.  Will implement on separated scalars at a later date.
